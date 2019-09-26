@@ -420,10 +420,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44c92d9bc6539904fa6f45dd40fd04de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  transparentCubePrefab: {fileID: 2628962019459238065, guid: 8505030d48079704e96de9905aaa871c,
+    type: 3}
   randomSeed: 23579
   rotateSpeed: 0.5
   branchOrderMax: 3
   growthCycles: 8
+  clusterGridNumCells: 5
+  printClusterGrid: 1
   branchParameters:
   - orderName: Order 1
     order: 1

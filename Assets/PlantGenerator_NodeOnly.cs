@@ -10,17 +10,31 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
     private List<Branch> branches;
     private GameObject plant;
 
+    private GameObject clusterGridObjectSize;
+    private GameObject clusterGridObjectTransparency;
+
     private bool isPaused = true;
+    private bool showClusterGridSize = false;
+    private bool showClusterGridTransparency = false;
 
     /////////////////////////////////////////////////////////////////////////////////////
 
 
     ////////////////////////////// Public Attriutes ////////////////////////////////////
+    public GameObject transparentCubePrefab;
 
     public int randomSeed = 55;
     public float rotateSpeed = 0.5f;
     public int branchOrderMax = 3;
     public int growthCycles = 6;
+
+    // Cluster Grid variables
+    int[,,] clusterGrid;       // [i, j, k] = x, y, z position in cluster grid
+    float maxTreeRadius;
+    int maxClusterPoints = 0;  // Keeps track of the highest number of ring/nodes in a cluster cell
+    float clusterGridCellSize;
+    public int clusterGridNumCells = 5;
+    public bool printClusterGrid = true;
 
     //public int maxSubBranchesPerNode = 3;
     //public int numRingsBetweenNodes = 8;
@@ -51,6 +65,11 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         //    branchParameters[i] = new BranchParam("Order " + (i + 1).ToString(), 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f);
         //}
 
+        // Set up cluster grid
+        clusterGrid = new int[(2 * clusterGridNumCells) + 1, clusterGridNumCells, (2 * clusterGridNumCells) + 1];
+        maxTreeRadius = growthCycles * branchParameters[0].growthLength;
+        clusterGridCellSize = maxTreeRadius / clusterGridNumCells;
+
         // Set random seed
         Random.InitState(randomSeed);
          
@@ -60,6 +79,60 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         // Generate plant mesh
         plant = generatePlant();
         plant.transform.position = this.transform.position;
+
+        // Print cluster data
+        //print(clusterGrid[clusterGridNumCells + -1, 0, clusterGridNumCells + -1]);
+        //print(maxClusterPoints);
+
+        // Create cluster grid based on size
+        clusterGridObjectSize = new GameObject("Cluster Grid - Size");
+        clusterGridObjectSize.transform.position = this.transform.position;
+        for (int i = 0; i < (2 * clusterGridNumCells) + 1; i++) {
+            for (int j = 0; j < clusterGridNumCells; j ++) {
+                for (int k = 0; k < (2 * clusterGridNumCells) + 1; k ++) {
+                    if (clusterGrid[i, j, k] > 0) {
+                        GameObject cubeCell = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        cubeCell.transform.parent = clusterGridObjectSize.transform;
+
+                        float xPos = ((clusterGridCellSize * i) + (0.5f * clusterGridCellSize)) - ((clusterGridNumCells + 0.5f) * clusterGridCellSize);
+                        float yPos = ((clusterGridCellSize * j) + (0.5f * clusterGridCellSize));
+                        float zPos = ((clusterGridCellSize * k) + (0.5f * clusterGridCellSize)) - ((clusterGridNumCells + 0.5f) * clusterGridCellSize);
+                        cubeCell.transform.localPosition = new Vector3(xPos, yPos, zPos);
+
+                        float maxCubeScale = clusterGridCellSize;
+                        float cubeScale = maxCubeScale * ((float)clusterGrid[i, j, k]) / ((float)maxClusterPoints);
+                        cubeCell.transform.localScale = new Vector3(cubeScale, cubeScale, cubeScale);
+                    }
+                }
+            }
+        }
+
+        // Create cluster grid based on transparency
+        clusterGridObjectTransparency = new GameObject("Cluster Grid - Transparency");
+        clusterGridObjectTransparency.transform.position = this.transform.position;
+        for (int i = 0; i < (2 * clusterGridNumCells) + 1; i++) {
+            for (int j = 0; j < clusterGridNumCells; j++) {
+                for (int k = 0; k < (2 * clusterGridNumCells) + 1; k++) {
+                    if (clusterGrid[i, j, k] > 0) {
+                        GameObject cubeCell = GameObject.Instantiate(transparentCubePrefab);
+                        cubeCell.transform.parent = clusterGridObjectTransparency.transform;
+
+                        float xPos = ((clusterGridCellSize * i) + (0.5f * clusterGridCellSize)) - ((clusterGridNumCells + 0.5f) * clusterGridCellSize);
+                        float yPos = ((clusterGridCellSize * j) + (0.5f * clusterGridCellSize));
+                        float zPos = ((clusterGridCellSize * k) + (0.5f * clusterGridCellSize)) - ((clusterGridNumCells + 0.5f) * clusterGridCellSize);
+                        cubeCell.transform.localPosition = new Vector3(xPos, yPos, zPos);
+
+                        float maxCubeScale = clusterGridCellSize;
+                        cubeCell.transform.localScale = new Vector3(maxCubeScale, maxCubeScale, maxCubeScale);
+
+                        float transparency = ((float)clusterGrid[i, j, k]) / ((float)maxClusterPoints);
+                        //cubeCell.GetComponent<MeshRenderer>().material.shader;
+                        cubeCell.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 1.0f, 1.0f, transparency);
+                    }
+                }
+            }
+        }
+
     }
 
     // Update is called once per frame
@@ -69,6 +142,28 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         }
         if (!isPaused) {
             plant.transform.Rotate(0, rotateSpeed, 0);
+            clusterGridObjectSize.transform.rotation = plant.transform.rotation;
+            clusterGridObjectTransparency.transform.rotation = plant.transform.rotation;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+            showClusterGridSize = !showClusterGridSize;
+            showClusterGridTransparency = false;
+        } else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+            showClusterGridTransparency = !showClusterGridTransparency;
+            showClusterGridSize = false;
+        }
+
+        if (showClusterGridSize) {
+            clusterGridObjectSize.SetActive(true);
+        } else {
+            clusterGridObjectSize.SetActive(false);
+        }
+        if (showClusterGridTransparency) {
+            clusterGridObjectTransparency.SetActive(true);
+        }
+        else {
+            clusterGridObjectTransparency.SetActive(false);
         }
     }
 
@@ -308,6 +403,9 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                 oldTipPos = newTipPos;
                 oldVertLength = newVertsLength;
                 oldTriLength += 36;
+
+                // Update the cluster grid
+                updateClusterGrid(newTipPos);
             }
 
             // Create the new cap
@@ -422,6 +520,9 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             //Vector3 newTipDir = new Vector3((Random.value * 2f) - 1f, 1f + Random.value, (Random.value * 2f) - 1f);
             //Vector3 newTipDir = new Vector3(Random.value - 0.5f, 0.25f + Random.value, Random.value - 0.5f);
 
+            // Update the cluster grid
+            updateClusterGrid(newTipPos);
+
             // Tropism
             Vector3 newTipDir = T;
             if (branchOrder > 1) {
@@ -469,6 +570,50 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
 
             return newTipNode;
         }
+
+        public void updateClusterGrid(Vector3 newTipPos) {
+            // Update the cluster grid
+            float rad = plantGenerator.maxTreeRadius;
+            float s = plantGenerator.clusterGridCellSize;
+            int n = plantGenerator.clusterGridNumCells;
+
+            if (newTipPos.y >= 0) {     // Check if branch point didn't grow into ground
+                                        // i index
+                int i = n;
+                float iFloat = (newTipPos.x + (rad + 0.5f * s)) * ((float)n / (rad + 0.5f * s));
+                if (newTipPos.x > 0.5f * s) {
+                    i = Mathf.CeilToInt(iFloat);
+                }
+                else if (newTipPos.x < -0.5f * s) {
+                    i = Mathf.FloorToInt(iFloat);
+                }
+
+                // j index
+                int j = n - 1;
+                if (newTipPos.y < rad) {
+                    j = Mathf.FloorToInt(newTipPos.y / s);
+                }
+
+                // k index
+                int k = n;
+                float kFloat = (newTipPos.z + (rad + 0.5f * s)) * ((float)n / (rad + 0.5f * s));
+                if (newTipPos.z > 0.5f * s) {
+                    k = Mathf.CeilToInt(kFloat);
+                }
+                else if (newTipPos.z < -0.5f * s) {
+                    k = Mathf.FloorToInt(kFloat);
+                }
+
+                // Increment the correct cell of the cluster grid and update max cluster points
+                plantGenerator.clusterGrid[i, j, k] += 1;
+                if (plantGenerator.clusterGrid[i, j, k] > plantGenerator.maxClusterPoints) {
+                    plantGenerator.maxClusterPoints = plantGenerator.clusterGrid[i, j, k];
+                }
+                //print(i.ToString() + ", " + j.ToString() + ", " + k.ToString());
+                //print("X: " + newTipPos.x.ToString() + ";   i: " + i.ToString());
+            }
+        }
+
     }
 
 
@@ -483,6 +628,8 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         Vector3 direct;
         if (branches.Count == 0) {
             direct = new Vector3(0f, 1f, 0f);
+            clusterGrid[clusterGridNumCells, 0, clusterGridNumCells] = 1;    // First node in cluster
+            maxClusterPoints = 1;
         } 
         else {
             //direct = new Vector3((Random.value * 2f) - 1f, 0.1f + Random.value, (Random.value * 2f) - 1f);
