@@ -29,12 +29,11 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
     public int growthCycles = 6;
 
     // Cluster Grid variables
-    int[,,] clusterGrid;       // [i, j, k] = x, y, z position in cluster grid
+    float[,,] clusterGrid;       // [i, j, k] = x, y, z position in cluster grid
     float maxTreeRadius;
-    int maxClusterPoints = 0;  // Keeps track of the highest number of ring/nodes in a cluster cell
+    float maxClusterPoints = 0;  // Keeps track of the highest number of ring/nodes in a cluster cell
     float clusterGridCellSize;
     public int clusterGridNumCells = 5;
-    public bool printClusterGrid = true;
 
     //public int maxSubBranchesPerNode = 3;
     //public int numRingsBetweenNodes = 8;
@@ -50,11 +49,14 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
     //public float spiralStartAngle = 0f;
     //public float wiggleFactor = 0.05f;
 
-    public static BranchParam order1 = new BranchParam("Order 1", 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f);
-    public static BranchParam order2 = new BranchParam("Order 2", 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f);
-    public static BranchParam order3 = new BranchParam("Order 3", 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f);
-    public BranchParam[] branchParameters = { order1, order2, order3 };
+    //public static BranchParam order1 = new BranchParam("Order 1", 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f, 500f);
+    //public static BranchParam order2 = new BranchParam("Order 2", 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f, 500f);
+    //public static BranchParam order3 = new BranchParam("Order 3", 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f, 500f);
+    //public static BranchParam order4 = new BranchParam("Order 4", 1, 1, 1, 6, 6, 3f, 0.75f, 0.02f, 0.1f, 0f, true, 60f, 0f, 0.05f, 500f);
+    //public BranchParam[] branchParameters = { order1, order2, order3, order4 };
     //public BranchParam[] branchParameters;
+
+    public List<BranchParam> branchParameters = new List<BranchParam>(0);
 
     ////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,7 +68,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         //}
 
         // Set up cluster grid
-        clusterGrid = new int[(2 * clusterGridNumCells) + 1, clusterGridNumCells, (2 * clusterGridNumCells) + 1];
+        clusterGrid = new float[(2 * clusterGridNumCells) + 1, clusterGridNumCells, (2 * clusterGridNumCells) + 1];
         maxTreeRadius = growthCycles * branchParameters[0].growthLength;
         clusterGridCellSize = maxTreeRadius / clusterGridNumCells;
 
@@ -90,7 +92,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         for (int i = 0; i < (2 * clusterGridNumCells) + 1; i++) {
             for (int j = 0; j < clusterGridNumCells; j ++) {
                 for (int k = 0; k < (2 * clusterGridNumCells) + 1; k ++) {
-                    if (clusterGrid[i, j, k] > 0) {
+                    if (clusterGrid[i, j, k] > 0f) {
                         GameObject cubeCell = GameObject.CreatePrimitive(PrimitiveType.Cube);
                         cubeCell.transform.parent = clusterGridObjectSize.transform;
 
@@ -100,7 +102,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                         cubeCell.transform.localPosition = new Vector3(xPos, yPos, zPos);
 
                         float maxCubeScale = clusterGridCellSize;
-                        float cubeScale = maxCubeScale * ((float)clusterGrid[i, j, k]) / ((float)maxClusterPoints);
+                        float cubeScale = maxCubeScale * (clusterGrid[i, j, k]) / (maxClusterPoints);
                         cubeCell.transform.localScale = new Vector3(cubeScale, cubeScale, cubeScale);
                     }
                 }
@@ -113,7 +115,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         for (int i = 0; i < (2 * clusterGridNumCells) + 1; i++) {
             for (int j = 0; j < clusterGridNumCells; j++) {
                 for (int k = 0; k < (2 * clusterGridNumCells) + 1; k++) {
-                    if (clusterGrid[i, j, k] > 0) {
+                    if (clusterGrid[i, j, k] > 0f) {
                         GameObject cubeCell = GameObject.Instantiate(transparentCubePrefab);
                         cubeCell.transform.parent = clusterGridObjectTransparency.transform;
 
@@ -125,7 +127,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                         float maxCubeScale = clusterGridCellSize;
                         cubeCell.transform.localScale = new Vector3(maxCubeScale, maxCubeScale, maxCubeScale);
 
-                        float transparency = ((float)clusterGrid[i, j, k]) / ((float)maxClusterPoints);
+                        float transparency = (clusterGrid[i, j, k]) / (maxClusterPoints);
                         //cubeCell.GetComponent<MeshRenderer>().material.shader;
                         cubeCell.GetComponent<MeshRenderer>().material.color = new Color(1.0f, 1.0f, 1.0f, transparency);
                     }
@@ -156,7 +158,8 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
 
         if (showClusterGridSize) {
             clusterGridObjectSize.SetActive(true);
-        } else {
+        }
+        else {
             clusterGridObjectSize.SetActive(false);
         }
         if (showClusterGridTransparency) {
@@ -288,21 +291,26 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             int numRings = plantGenerator.branchParameters[branchOrder - 1].numRingsBetweenNodes;
 
             // Create new lists of vertices and tris
-            Vector3[] newVerts = new Vector3[oldVertLength + (6 * numRings) + 7];
-            int[] newTris = new int[oldTriLength + (12 * numRings * 3) + (18 * 3)];
+            //Vector3[] newVerts = new Vector3[oldVertLength + (6 * numRings) + 7];
+            //int[] newTris = new int[oldTriLength + (12 * numRings * 3) + (18 * 3)];
+
+            List<Vector3> newVerts = new List<Vector3>(oldVertLength);
+            List<int> newTris = new List<int>(oldTriLength);
 
             // Check if branch is not just a cylinder base in mesh
             // If it is multiple cylinders, "cut off" the top cap of the mesh
             int stopCopyIndex = (oldVertLength > 7) ? oldTriLength - 18 - 1 : oldTriLength - 1;
 
             for (int v = 0; v < oldVertLength; v++) {
-                newVerts[v] = oldVerts[v];
+                //newVerts[v] = oldVerts[v];
+                newVerts.Add(oldVerts[v]);
             }
             //for (int t = 0; t <= stopCopyIndex; t++) {
             //    newTris[t] = oldTris[t];
             //}
             for (int t = 0; t < oldTriLength; t++) {
-                newTris[t] = oldTris[t];
+                //newTris[t] = oldTris[t];
+                newTris.Add(oldTris[t]);
             }
 
             // Calculate new vertices
@@ -320,20 +328,28 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             bool spiraling = plantGenerator.branchParameters[branchOrder - 1].spiraling;
             float spiralAngle = plantGenerator.branchParameters[branchOrder - 1].spiralAngle;
             float spiralStartAngle = plantGenerator.branchParameters[branchOrder - 1].spiralStartAngle;
+            float tropism = plantGenerator.branchParameters[branchOrder - 1].tropism;
             float wiggleFactor = plantGenerator.branchParameters[branchOrder - 1].wiggleFactor;
+            float wiggleCorrected = (growthLength / numRings) * wiggleFactor;
+            float densityThreshold = plantGenerator.branchParameters[branchOrder - 1].densityThreshold;
 
             // Add the rings
-            Vector3 newTipPos;
+            Vector3 newTipPos = oldTipPos;
+            Vector3 capPos = oldTipPos;
             int newVertsLength;
 
-            for (int r = 1; r <= numRings; r++) {
+            bool stoppedGrowing = false;
+
+            // All rings + new node
+            for (int r = 1; r <= numRings + 1; r++) {
                 // Tropism
                 if (branchOrder > 1) {
-                    T += new Vector3(0f, plantGenerator.branchParameters[branchOrder - 1].tropism, 0);
+                    T += new Vector3(0f, (growthLength / numRings) * tropism, 0);
                 }
 
                 // Add a wiggle as the branch grows
-                T = T + (Random.Range(-wiggleFactor, wiggleFactor) * N) + (Random.Range(-wiggleFactor, wiggleFactor) * B);
+                T = T + (Random.Range(-wiggleCorrected, wiggleCorrected) * N) + (Random.Range(-wiggleCorrected, wiggleCorrected) * B);
+                T = T.normalized;
                 V = (T.x == 1f) ? new Vector3(0f, 1f, 0f) : new Vector3(1f, 0f, 0f);
                 N = -1f * (Vector3.Cross(T, V)).normalized;
                 B = Vector3.Cross(T, N);
@@ -341,196 +357,351 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                 // Verts
                 newTipPos = oldTipPos + (T * growthLength / ((float)numRings + 1));
 
-                newVerts[oldVertLength] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness));
-                newVerts[oldVertLength + 1] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness));
-                newVerts[oldVertLength + 2] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness));
-                newVerts[oldVertLength + 3] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness));
-                newVerts[oldVertLength + 4] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness));
-                newVerts[oldVertLength + 5] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness));
+                float currDensity = getClusterGridValue(newTipPos);
+                if (stoppedGrowing == false && currDensity >= 0 && currDensity < densityThreshold) {
 
-                newVertsLength = oldVertLength + 6;
+                    capPos = newTipPos;
 
-                // Tris
-                // Sides
-                newTris[oldTriLength] = newVertsLength - 7;
-                newTris[oldTriLength + 1] = newVertsLength - 12;
-                newTris[oldTriLength + 2] = newVertsLength - 6;
+                    //newVerts[oldVertLength] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness));
+                    //newVerts[oldVertLength + 1] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness));
+                    //newVerts[oldVertLength + 2] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness));
+                    //newVerts[oldVertLength + 3] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness));
+                    //newVerts[oldVertLength + 4] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness));
+                    //newVerts[oldVertLength + 5] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness));
 
-                newTris[oldTriLength + 3] = newVertsLength - 12;
-                newTris[oldTriLength + 4] = newVertsLength - 5;
-                newTris[oldTriLength + 5] = newVertsLength - 6;
+                    newVerts.Add(newTipPos);
+                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness)));
+                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness)));
+                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness)));
+                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness)));
+                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness)));
+                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness)));
 
-                newTris[oldTriLength + 6] = newVertsLength - 12;
-                newTris[oldTriLength + 7] = newVertsLength - 11;
-                newTris[oldTriLength + 8] = newVertsLength - 5;
+                    newVertsLength = oldVertLength + 7;
 
-                newTris[oldTriLength + 9] = newVertsLength - 11;
-                newTris[oldTriLength + 10] = newVertsLength - 4;
-                newTris[oldTriLength + 11] = newVertsLength - 5;
+                    // Tris
+                    // Sides
+                    //newTris[oldTriLength] = newVertsLength - 7;
+                    //newTris[oldTriLength + 1] = newVertsLength - 12;
+                    //newTris[oldTriLength + 2] = newVertsLength - 6;
 
-                newTris[oldTriLength + 12] = newVertsLength - 11;
-                newTris[oldTriLength + 13] = newVertsLength - 10;
-                newTris[oldTriLength + 14] = newVertsLength - 4;
+                    //newTris[oldTriLength + 3] = newVertsLength - 12;
+                    //newTris[oldTriLength + 4] = newVertsLength - 5;
+                    //newTris[oldTriLength + 5] = newVertsLength - 6;
 
-                newTris[oldTriLength + 15] = newVertsLength - 10;
-                newTris[oldTriLength + 16] = newVertsLength - 3;
-                newTris[oldTriLength + 17] = newVertsLength - 4;
+                    //newTris[oldTriLength + 6] = newVertsLength - 12;
+                    //newTris[oldTriLength + 7] = newVertsLength - 11;
+                    //newTris[oldTriLength + 8] = newVertsLength - 5;
 
-                newTris[oldTriLength + 18] = newVertsLength - 10;
-                newTris[oldTriLength + 19] = newVertsLength - 9;
-                newTris[oldTriLength + 20] = newVertsLength - 3;
+                    //newTris[oldTriLength + 9] = newVertsLength - 11;
+                    //newTris[oldTriLength + 10] = newVertsLength - 4;
+                    //newTris[oldTriLength + 11] = newVertsLength - 5;
 
-                newTris[oldTriLength + 21] = newVertsLength - 9;
-                newTris[oldTriLength + 22] = newVertsLength - 2;
-                newTris[oldTriLength + 23] = newVertsLength - 3;
+                    //newTris[oldTriLength + 12] = newVertsLength - 11;
+                    //newTris[oldTriLength + 13] = newVertsLength - 10;
+                    //newTris[oldTriLength + 14] = newVertsLength - 4;
 
-                newTris[oldTriLength + 24] = newVertsLength - 9;
-                newTris[oldTriLength + 25] = newVertsLength - 8;
-                newTris[oldTriLength + 26] = newVertsLength - 2;
+                    //newTris[oldTriLength + 15] = newVertsLength - 10;
+                    //newTris[oldTriLength + 16] = newVertsLength - 3;
+                    //newTris[oldTriLength + 17] = newVertsLength - 4;
 
-                newTris[oldTriLength + 27] = newVertsLength - 8;
-                newTris[oldTriLength + 28] = newVertsLength - 1;
-                newTris[oldTriLength + 29] = newVertsLength - 2;
+                    //newTris[oldTriLength + 18] = newVertsLength - 10;
+                    //newTris[oldTriLength + 19] = newVertsLength - 9;
+                    //newTris[oldTriLength + 20] = newVertsLength - 3;
 
-                newTris[oldTriLength + 30] = newVertsLength - 8;
-                newTris[oldTriLength + 31] = newVertsLength - 7;
-                newTris[oldTriLength + 32] = newVertsLength - 1;
+                    //newTris[oldTriLength + 21] = newVertsLength - 9;
+                    //newTris[oldTriLength + 22] = newVertsLength - 2;
+                    //newTris[oldTriLength + 23] = newVertsLength - 3;
 
-                newTris[oldTriLength + 33] = newVertsLength - 7;
-                newTris[oldTriLength + 34] = newVertsLength - 6;
-                newTris[oldTriLength + 35] = newVertsLength - 1;
+                    //newTris[oldTriLength + 24] = newVertsLength - 9;
+                    //newTris[oldTriLength + 25] = newVertsLength - 8;
+                    //newTris[oldTriLength + 26] = newVertsLength - 2;
 
-                oldTipPos = newTipPos;
-                oldVertLength = newVertsLength;
-                oldTriLength += 36;
+                    //newTris[oldTriLength + 27] = newVertsLength - 8;
+                    //newTris[oldTriLength + 28] = newVertsLength - 1;
+                    //newTris[oldTriLength + 29] = newVertsLength - 2;
 
-                // Update the cluster grid
-                updateClusterGrid(newTipPos);
+                    //newTris[oldTriLength + 30] = newVertsLength - 8;
+                    //newTris[oldTriLength + 31] = newVertsLength - 7;
+                    //newTris[oldTriLength + 32] = newVertsLength - 1;
+
+                    //newTris[oldTriLength + 33] = newVertsLength - 7;
+                    //newTris[oldTriLength + 34] = newVertsLength - 6;
+                    //newTris[oldTriLength + 35] = newVertsLength - 1;
+
+                    // Get rid of old cap
+                    for (int i = 0; i < 18; i++) {
+                        newTris.Remove(newTris.Count - 1);
+                    }
+
+                    //newTris.Add(newVertsLength - 7);
+                    //newTris.Add(newVertsLength - 12);
+                    //newTris.Add(newVertsLength - 6);
+
+                    //newTris.Add(newVertsLength - 12);
+                    //newTris.Add(newVertsLength - 5);
+                    //newTris.Add(newVertsLength - 6);
+
+                    //newTris.Add(newVertsLength - 12);
+                    //newTris.Add(newVertsLength - 11);
+                    //newTris.Add(newVertsLength - 5);
+
+                    //newTris.Add(newVertsLength - 11);
+                    //newTris.Add(newVertsLength - 4);
+                    //newTris.Add(newVertsLength - 5);
+
+                    //newTris.Add(newVertsLength - 11);
+                    //newTris.Add(newVertsLength - 10);
+                    //newTris.Add(newVertsLength - 4);
+
+                    //newTris.Add(newVertsLength - 10);
+                    //newTris.Add(newVertsLength - 3);
+                    //newTris.Add(newVertsLength - 4);
+
+                    //newTris.Add(newVertsLength - 10);
+                    //newTris.Add(newVertsLength - 9);
+                    //newTris.Add(newVertsLength - 3);
+
+                    //newTris.Add(newVertsLength - 9);
+                    //newTris.Add(newVertsLength - 2);
+                    //newTris.Add(newVertsLength - 3);
+
+                    //newTris.Add(newVertsLength - 9);
+                    //newTris.Add(newVertsLength - 8);
+                    //newTris.Add(newVertsLength - 2);
+
+                    //newTris.Add(newVertsLength - 8);
+                    //newTris.Add(newVertsLength - 1);
+                    //newTris.Add(newVertsLength - 2);
+
+                    //newTris.Add(newVertsLength - 8);
+                    //newTris.Add(newVertsLength - 7);
+                    //newTris.Add(newVertsLength - 1);
+
+                    //newTris.Add(newVertsLength - 7);
+                    //newTris.Add(newVertsLength - 6);
+                    //newTris.Add(newVertsLength - 1);
+
+                    // Sides
+                    newTris.Add(newVertsLength - 13);
+                    newTris.Add(newVertsLength - 12);
+                    newTris.Add(newVertsLength - 6);
+
+                    newTris.Add(newVertsLength - 12);
+                    newTris.Add(newVertsLength - 5);
+                    newTris.Add(newVertsLength - 6);
+
+                    newTris.Add(newVertsLength - 12);
+                    newTris.Add(newVertsLength - 11);
+                    newTris.Add(newVertsLength - 5);
+
+                    newTris.Add(newVertsLength - 11);
+                    newTris.Add(newVertsLength - 4);
+                    newTris.Add(newVertsLength - 5);
+
+                    newTris.Add(newVertsLength - 11);
+                    newTris.Add(newVertsLength - 10);
+                    newTris.Add(newVertsLength - 4);
+
+                    newTris.Add(newVertsLength - 10);
+                    newTris.Add(newVertsLength - 3);
+                    newTris.Add(newVertsLength - 4);
+
+                    newTris.Add(newVertsLength - 10);
+                    newTris.Add(newVertsLength - 9);
+                    newTris.Add(newVertsLength - 3);
+
+                    newTris.Add(newVertsLength - 9);
+                    newTris.Add(newVertsLength - 2);
+                    newTris.Add(newVertsLength - 3);
+
+                    newTris.Add(newVertsLength - 9);
+                    newTris.Add(newVertsLength - 8);
+                    newTris.Add(newVertsLength - 2);
+
+                    newTris.Add(newVertsLength - 8);
+                    newTris.Add(newVertsLength - 1);
+                    newTris.Add(newVertsLength - 2);
+
+                    newTris.Add(newVertsLength - 8);
+                    newTris.Add(newVertsLength - 13);
+                    newTris.Add(newVertsLength - 1);
+
+                    newTris.Add(newVertsLength - 13);
+                    newTris.Add(newVertsLength - 6);
+                    newTris.Add(newVertsLength - 1);
+
+                    // New cap
+                    newTris.Add(newVertsLength - 7);
+                    newTris.Add(newVertsLength - 6);
+                    newTris.Add(newVertsLength - 5);
+
+                    newTris.Add(newVertsLength - 7);
+                    newTris.Add(newVertsLength - 5);
+                    newTris.Add(newVertsLength - 4);
+
+                    newTris.Add(newVertsLength - 7);
+                    newTris.Add(newVertsLength - 4);
+                    newTris.Add(newVertsLength - 3);
+
+                    newTris.Add(newVertsLength - 7);
+                    newTris.Add(newVertsLength - 3);
+                    newTris.Add(newVertsLength - 2);
+
+                    newTris.Add(newVertsLength - 7);
+                    newTris.Add(newVertsLength - 2);
+                    newTris.Add(newVertsLength - 1);
+
+                    newTris.Add(newVertsLength - 7);
+                    newTris.Add(newVertsLength - 1);
+                    newTris.Add(newVertsLength - 6);
+
+                    oldTipPos = newTipPos;
+                    oldVertLength = newVertsLength;
+                    //print(oldVertLength);
+                    oldTriLength += 36;
+
+                    // Update the cluster grid
+                    updateClusterGrid(newTipPos);
+                } else {
+                    stoppedGrowing = true;
+                }
             }
 
-            // Create the new cap
+            //// Create the new cap
 
-            // Tropism
-            if (branchOrder > 1) {
-                T += new Vector3(0f, plantGenerator.branchParameters[branchOrder - 1].tropism, 0);
-            }
+            //// Tropism
+            //if (branchOrder > 1) {
+            //    T += new Vector3(0f, (growthLength / numRings) * tropism, 0);
+            //}
 
-            // Add a wiggle as the branch grows
-            T = T + (Random.Range(-wiggleFactor, wiggleFactor) * N) + (Random.Range(-wiggleFactor, wiggleFactor) * B);
-            V = (T.x == 1f) ? new Vector3(0f, 1f, 0f) : new Vector3(1f, 0f, 0f);
-            N = -1f * (Vector3.Cross(T, V)).normalized;
-            B = Vector3.Cross(T, N);
+            //// Add a wiggle as the branch grows
+            //T = T + (Random.Range(-wiggleCorrected, wiggleCorrected) * N) + (Random.Range(-wiggleCorrected, wiggleCorrected) * B);
+            //T = T.normalized;
+            //V = (T.x == 1f) ? new Vector3(0f, 1f, 0f) : new Vector3(1f, 0f, 0f);
+            //N = -1f * (Vector3.Cross(T, V)).normalized;
+            //B = Vector3.Cross(T, N);
 
-            newTipPos = oldTipPos + (T * growthLength / (numRings + 1));
+            //newTipPos = oldTipPos + (T * growthLength / (numRings + 1));
 
-            //newVerts[oldVertLength] = newTipPos;
-            //newVerts[oldVertLength + 1] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 0f), 0f, Mathf.Sin(Mathf.Deg2Rad * 0f));
-            //newVerts[oldVertLength + 2] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 60f), 0f, Mathf.Sin(Mathf.Deg2Rad * 60f));
-            //newVerts[oldVertLength + 3] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 120f), 0f, Mathf.Sin(Mathf.Deg2Rad * 120f));
-            //newVerts[oldVertLength + 4] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 180f), 0f, Mathf.Sin(Mathf.Deg2Rad * 180f));
-            //newVerts[oldVertLength + 5] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 240f), 0f, Mathf.Sin(Mathf.Deg2Rad * 240f));
-            //newVerts[oldVertLength + 6] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 300f), 0f, Mathf.Sin(Mathf.Deg2Rad * 300f));
+            ////newVerts[oldVertLength] = newTipPos;
+            ////newVerts[oldVertLength + 1] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 0f), 0f, Mathf.Sin(Mathf.Deg2Rad * 0f));
+            ////newVerts[oldVertLength + 2] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 60f), 0f, Mathf.Sin(Mathf.Deg2Rad * 60f));
+            ////newVerts[oldVertLength + 3] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 120f), 0f, Mathf.Sin(Mathf.Deg2Rad * 120f));
+            ////newVerts[oldVertLength + 4] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 180f), 0f, Mathf.Sin(Mathf.Deg2Rad * 180f));
+            ////newVerts[oldVertLength + 5] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 240f), 0f, Mathf.Sin(Mathf.Deg2Rad * 240f));
+            ////newVerts[oldVertLength + 6] = newTipPos + new Vector3(Mathf.Cos(Mathf.Deg2Rad * 300f), 0f, Mathf.Sin(Mathf.Deg2Rad * 300f));
 
-            newVerts[oldVertLength] = newTipPos;
-            newVerts[oldVertLength + 1] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness));
-            newVerts[oldVertLength + 2] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness));
-            newVerts[oldVertLength + 3] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness));
-            newVerts[oldVertLength + 4] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness));
-            newVerts[oldVertLength + 5] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness));
-            newVerts[oldVertLength + 6] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness));
+            ////newVerts[oldVertLength] = newTipPos;
+            ////newVerts[oldVertLength + 1] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness));
+            ////newVerts[oldVertLength + 2] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness));
+            ////newVerts[oldVertLength + 3] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness));
+            ////newVerts[oldVertLength + 4] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness));
+            ////newVerts[oldVertLength + 5] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness));
+            ////newVerts[oldVertLength + 6] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness));
 
-            newVertsLength = newVerts.Length;
+            //newVerts.Add(newTipPos);
+            //newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness)));
+            //newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness)));
+            //newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness)));
+            //newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness)));
+            //newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness)));
+            //newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness)));
 
-            // Calculate new tris
-            // Sides
-            newTris[oldTriLength] = newVertsLength - 13;
-            newTris[oldTriLength + 1] = newVertsLength - 12;
-            newTris[oldTriLength + 2] = newVertsLength - 6;
+            //newVertsLength = newVerts.Count;
 
-            newTris[oldTriLength + 3] = newVertsLength - 12;
-            newTris[oldTriLength + 4] = newVertsLength - 5;
-            newTris[oldTriLength + 5] = newVertsLength - 6;
+            //// Calculate new tris
+            //// Sides
+            //newTris.Add(newVertsLength - 13);
+            //newTris.Add(newVertsLength - 12);
+            //newTris.Add(newVertsLength - 6);
 
-            newTris[oldTriLength + 6] = newVertsLength - 12;
-            newTris[oldTriLength + 7] = newVertsLength - 11;
-            newTris[oldTriLength + 8] = newVertsLength - 5;
+            //newTris.Add(newVertsLength - 12);
+            //newTris.Add(newVertsLength - 5);
+            //newTris.Add(newVertsLength - 6);
 
-            newTris[oldTriLength + 9] = newVertsLength - 11;
-            newTris[oldTriLength + 10] = newVertsLength - 4;
-            newTris[oldTriLength + 11] = newVertsLength - 5;
+            //newTris.Add(newVertsLength - 12);
+            //newTris.Add(newVertsLength - 11);
+            //newTris.Add(newVertsLength - 5);
 
-            newTris[oldTriLength + 12] = newVertsLength - 11;
-            newTris[oldTriLength + 13] = newVertsLength - 10;
-            newTris[oldTriLength + 14] = newVertsLength - 4;
+            //newTris.Add(newVertsLength - 11);
+            //newTris.Add(newVertsLength - 4);
+            //newTris.Add(newVertsLength - 5);
 
-            newTris[oldTriLength + 15] = newVertsLength - 10;
-            newTris[oldTriLength + 16] = newVertsLength - 3;
-            newTris[oldTriLength + 17] = newVertsLength - 4;
+            //newTris.Add(newVertsLength - 11);
+            //newTris.Add(newVertsLength - 10);
+            //newTris.Add(newVertsLength - 4);
 
-            newTris[oldTriLength + 18] = newVertsLength - 10;
-            newTris[oldTriLength + 19] = newVertsLength - 9;
-            newTris[oldTriLength + 20] = newVertsLength - 3;
+            //newTris.Add(newVertsLength - 10);
+            //newTris.Add(newVertsLength - 3);
+            //newTris.Add(newVertsLength - 4);
 
-            newTris[oldTriLength + 21] = newVertsLength - 9;
-            newTris[oldTriLength + 22] = newVertsLength - 2;
-            newTris[oldTriLength + 23] = newVertsLength - 3;
+            //newTris.Add(newVertsLength - 10);
+            //newTris.Add(newVertsLength - 9);
+            //newTris.Add(newVertsLength - 3);
 
-            newTris[oldTriLength + 24] = newVertsLength - 9;
-            newTris[oldTriLength + 25] = newVertsLength - 8;
-            newTris[oldTriLength + 26] = newVertsLength - 2;
+            //newTris.Add(newVertsLength - 9);
+            //newTris.Add(newVertsLength - 2);
+            //newTris.Add(newVertsLength - 3);
 
-            newTris[oldTriLength + 27] = newVertsLength - 8;
-            newTris[oldTriLength + 28] = newVertsLength - 1;
-            newTris[oldTriLength + 29] = newVertsLength - 2;
+            //newTris.Add(newVertsLength - 9);
+            //newTris.Add(newVertsLength - 8);
+            //newTris.Add(newVertsLength - 2);
 
-            newTris[oldTriLength + 30] = newVertsLength - 8;
-            newTris[oldTriLength + 31] = newVertsLength - 13;
-            newTris[oldTriLength + 32] = newVertsLength - 1;
+            //newTris.Add(newVertsLength - 8);
+            //newTris.Add(newVertsLength - 1);
+            //newTris.Add(newVertsLength - 2);
 
-            newTris[oldTriLength + 33] = newVertsLength - 13;
-            newTris[oldTriLength + 34] = newVertsLength - 6;
-            newTris[oldTriLength + 35] = newVertsLength - 1;
+            //newTris.Add(newVertsLength - 8);
+            //newTris.Add(newVertsLength - 13);
+            //newTris.Add(newVertsLength - 1);
 
-            // New cap
-            newTris[oldTriLength + 36] = newVertsLength - 7;
-            newTris[oldTriLength + 37] = newVertsLength - 6;
-            newTris[oldTriLength + 38] = newVertsLength - 5;
+            //newTris.Add(newVertsLength - 13);
+            //newTris.Add(newVertsLength - 6);
+            //newTris.Add(newVertsLength - 1);
 
-            newTris[oldTriLength + 39] = newVertsLength - 7;
-            newTris[oldTriLength + 40] = newVertsLength - 5;
-            newTris[oldTriLength + 41] = newVertsLength - 4;
+            //// New cap
+            //newTris.Add(newVertsLength - 7);
+            //newTris.Add(newVertsLength - 6);
+            //newTris.Add(newVertsLength - 5);
 
-            newTris[oldTriLength + 42] = newVertsLength - 7;
-            newTris[oldTriLength + 43] = newVertsLength - 4;
-            newTris[oldTriLength + 44] = newVertsLength - 3;
+            //newTris.Add(newVertsLength - 7);
+            //newTris.Add(newVertsLength - 5);
+            //newTris.Add(newVertsLength - 4);
 
-            newTris[oldTriLength + 45] = newVertsLength - 7;
-            newTris[oldTriLength + 46] = newVertsLength - 3;
-            newTris[oldTriLength + 47] = newVertsLength - 2;
+            //newTris.Add(newVertsLength - 7);
+            //newTris.Add(newVertsLength - 4);
+            //newTris.Add(newVertsLength - 3);
 
-            newTris[oldTriLength + 48] = newVertsLength - 7;
-            newTris[oldTriLength + 49] = newVertsLength - 2;
-            newTris[oldTriLength + 50] = newVertsLength - 1;
+            //newTris.Add(newVertsLength - 7);
+            //newTris.Add(newVertsLength - 3);
+            //newTris.Add(newVertsLength - 2);
 
-            newTris[oldTriLength + 51] = newVertsLength - 7;
-            newTris[oldTriLength + 52] = newVertsLength - 1;
-            newTris[oldTriLength + 53] = newVertsLength - 6;
+            //newTris.Add(newVertsLength - 7);
+            //newTris.Add(newVertsLength - 2);
+            //newTris.Add(newVertsLength - 1);
 
-            // Make newtipNode and add it to branch's node list
-            //Vector3 newTipDir = new Vector3((Random.value * 2f) - 1f, 1f + Random.value, (Random.value * 2f) - 1f);
-            //Vector3 newTipDir = new Vector3(Random.value - 0.5f, 0.25f + Random.value, Random.value - 0.5f);
+            //newTris.Add(newVertsLength - 7);
+            //newTris.Add(newVertsLength - 1);
+            //newTris.Add(newVertsLength - 6);
 
-            // Update the cluster grid
-            updateClusterGrid(newTipPos);
+            //// Make newtipNode and add it to branch's node list
+            ////Vector3 newTipDir = new Vector3((Random.value * 2f) - 1f, 1f + Random.value, (Random.value * 2f) - 1f);
+            ////Vector3 newTipDir = new Vector3(Random.value - 0.5f, 0.25f + Random.value, Random.value - 0.5f);
+
+            //// Update the cluster grid
+            //updateClusterGrid(newTipPos);
 
             // Tropism
             Vector3 newTipDir = T;
             if (branchOrder > 1) {
-                newTipDir += new Vector3(0f, plantGenerator.branchParameters[branchOrder - 1].tropism, 0);
+                newTipDir += new Vector3(0f, (growthLength / numRings) * tropism, 0);
+                newTipDir += (Random.Range(-wiggleCorrected, wiggleCorrected) * N) + (Random.Range(-wiggleCorrected, wiggleCorrected) * B);
+                newTipDir = newTipDir.normalized;
             }
 
             // Create a new tipNode
-            Node newTipNode = new Node(newTipPos, newTipDir, age + 1, branchOrder, plantGenerator);
+            Node newTipNode = new Node(capPos, newTipDir, age + 1, branchOrder, plantGenerator);
 
             // Add a number of branches at the new node if enough growth cycles have gone by
             if (branchOrder < plantGenerator.branchOrderMax) { // Make sure the the plant is not branching too deep
@@ -564,8 +735,8 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             nodes.Add(newTipNode);
 
             // Set the new vertices and triangles for the mesh
-            branchMesh.vertices = newVerts;
-            branchMesh.triangles = newTris;
+            branchMesh.vertices = newVerts.ToArray();
+            branchMesh.triangles = newTris.ToArray();
             branchMesh.RecalculateNormals();
 
             return newTipNode;
@@ -573,6 +744,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
 
         public void updateClusterGrid(Vector3 newTipPos) {
             // Update the cluster grid
+
             float rad = plantGenerator.maxTreeRadius;
             float s = plantGenerator.clusterGridCellSize;
             int n = plantGenerator.clusterGridNumCells;
@@ -605,13 +777,53 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                 }
 
                 // Increment the correct cell of the cluster grid and update max cluster points
-                plantGenerator.clusterGrid[i, j, k] += 1;
+                plantGenerator.clusterGrid[i, j, k] += 1f;
                 if (plantGenerator.clusterGrid[i, j, k] > plantGenerator.maxClusterPoints) {
                     plantGenerator.maxClusterPoints = plantGenerator.clusterGrid[i, j, k];
                 }
                 //print(i.ToString() + ", " + j.ToString() + ", " + k.ToString());
                 //print("X: " + newTipPos.x.ToString() + ";   i: " + i.ToString());
             }
+        }
+
+        public float getClusterGridValue(Vector3 newTipPos) {
+            // Update the cluster grid
+
+            float rad = plantGenerator.maxTreeRadius;
+            float s = plantGenerator.clusterGridCellSize;
+            int n = plantGenerator.clusterGridNumCells;
+
+            if (newTipPos.y >= 0) {     // Check if branch point didn't grow into ground
+                                        // i index
+                int i = n;
+                float iFloat = (newTipPos.x + (rad + 0.5f * s)) * ((float)n / (rad + 0.5f * s));
+                if (newTipPos.x > 0.5f * s) {
+                    i = Mathf.CeilToInt(iFloat);
+                }
+                else if (newTipPos.x < -0.5f * s) {
+                    i = Mathf.FloorToInt(iFloat);
+                }
+
+                // j index
+                int j = n - 1;
+                if (newTipPos.y < rad) {
+                    j = Mathf.FloorToInt(newTipPos.y / s);
+                }
+
+                // k index
+                int k = n;
+                float kFloat = (newTipPos.z + (rad + 0.5f * s)) * ((float)n / (rad + 0.5f * s));
+                if (newTipPos.z > 0.5f * s) {
+                    k = Mathf.CeilToInt(kFloat);
+                }
+                else if (newTipPos.z < -0.5f * s) {
+                    k = Mathf.FloorToInt(kFloat);
+                }
+
+                // Return the cluster value at the correct cell of the cluster grid
+                return plantGenerator.clusterGrid[i, j, k];
+            }
+            return -1f;
         }
 
     }
@@ -628,8 +840,8 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         Vector3 direct;
         if (branches.Count == 0) {
             direct = new Vector3(0f, 1f, 0f);
-            clusterGrid[clusterGridNumCells, 0, clusterGridNumCells] = 1;    // First node in cluster
-            maxClusterPoints = 1;
+            clusterGrid[clusterGridNumCells, 0, clusterGridNumCells] = 1f;    // First node in cluster
+            maxClusterPoints = 1f;
         } 
         else {
             //direct = new Vector3((Random.value * 2f) - 1f, 0.1f + Random.value, (Random.value * 2f) - 1f);
@@ -797,6 +1009,20 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
 
     ////////////////////////////////////////////////////////////////////////////////////
 
+
+    // Branch Parameters List editing functions
+    public void AddNewOrder() {
+        int nextOrder = branchParameters.Count + 1;
+        branchParameters.Add(new BranchParam(nextOrder));
+    }
+
+    public void RemoveOrder(int index) {
+        branchParameters.RemoveAt(index);
+    }
+
+    public int GetOrderCount() {
+        return branchParameters.Count;
+    }
 }
 
 
@@ -819,8 +1045,14 @@ public class BranchParam
     public float spiralAngle = 60f;
     public float spiralStartAngle = 0f;
     public float wiggleFactor = 0.05f;
+    public float densityThreshold = 500f;
 
-    public BranchParam(string name, int ord, int maxBranch, int betweenBranch, float growL, int nRings, float thick, float shrink, float die, float pause, float trop, bool spiral, float sAngle, float sStartAngle, float wiggle) {
+    public BranchParam(int ord) {
+        order = ord;
+        orderName = "Order " + ord.ToString();
+    }
+
+    public BranchParam(string name, int ord, int maxBranch, int betweenBranch, float growL, int nRings, float thick, float shrink, float die, float pause, float trop, bool spiral, float sAngle, float sStartAngle, float wiggle, float denseThresh) {
         orderName = name;
         order = ord;
         maxSubBranchesPerNode = maxBranch;
@@ -836,6 +1068,7 @@ public class BranchParam
         spiralAngle = sAngle;
         spiralStartAngle = sStartAngle;
         wiggleFactor = wiggle;
+        densityThreshold = denseThresh;
 
 }
 

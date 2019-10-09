@@ -391,7 +391,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &1130278608
+--- !u!1 &814176894
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -399,8 +399,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1130278610}
-  - component: {fileID: 1130278609}
+  - component: {fileID: 814176897}
+  - component: {fileID: 814176895}
   m_Layer: 0
   m_Name: PlantWiggle
   m_TagString: Untagged
@@ -408,13 +408,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1130278609
+--- !u!114 &814176895
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1130278608}
+  m_GameObject: {fileID: 814176894}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44c92d9bc6539904fa6f45dd40fd04de, type: 3}
@@ -424,16 +424,15 @@ MonoBehaviour:
     type: 3}
   randomSeed: 23579
   rotateSpeed: 0.5
-  branchOrderMax: 3
+  branchOrderMax: 2
   growthCycles: 8
-  clusterGridNumCells: 5
-  printClusterGrid: 1
+  clusterGridNumCells: 15
   branchParameters:
   - orderName: Order 1
     order: 1
-    maxSubBranchesPerNode: 3
+    maxSubBranchesPerNode: 4
     cyclesBetweenBranching: 1
-    growthLength: 6.2
+    growthLength: 6.5
     numRingsBetweenNodes: 6
     thickness: 3
     branchShrinkness: 0.75
@@ -444,43 +443,30 @@ MonoBehaviour:
     spiralAngle: 60
     spiralStartAngle: 0
     wiggleFactor: 0.05
+    densityThreshold: 500
   - orderName: Order 2
-    order: 1
-    maxSubBranchesPerNode: 2
-    cyclesBetweenBranching: 1
-    growthLength: 6
-    numRingsBetweenNodes: 6
-    thickness: 2
+    order: 2
+    maxSubBranchesPerNode: 3
+    cyclesBetweenBranching: 6
+    growthLength: 3
+    numRingsBetweenNodes: 8
+    thickness: 3
     branchShrinkness: 0.75
-    dieProbability: 0
-    pauseProbability: 0
-    tropism: 0.005
+    dieProbability: 0.02
+    pauseProbability: 0.1
+    tropism: 0
     spiraling: 1
-    spiralAngle: 0
-    spiralStartAngle: 90
-    wiggleFactor: 0.125
-  - orderName: Order 3
-    order: 1
-    maxSubBranchesPerNode: 2
-    cyclesBetweenBranching: 1
-    growthLength: 6
-    numRingsBetweenNodes: 6
-    thickness: 1
-    branchShrinkness: 0.75
-    dieProbability: 0
-    pauseProbability: 0
-    tropism: 0.0025
-    spiraling: 1
-    spiralAngle: 120
+    spiralAngle: 60
     spiralStartAngle: 0
-    wiggleFactor: 0.175
---- !u!4 &1130278610
+    wiggleFactor: 0.05
+    densityThreshold: 500
+--- !u!4 &814176897
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1130278608}
+  m_GameObject: {fileID: 814176894}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -784,6 +770,89 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1771584204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1771584206}
+  - component: {fileID: 1771584205}
+  m_Layer: 0
+  m_Name: PlantWiggle (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1771584205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1771584204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44c92d9bc6539904fa6f45dd40fd04de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  transparentCubePrefab: {fileID: 2628962019459238065, guid: 8505030d48079704e96de9905aaa871c,
+    type: 3}
+  randomSeed: 23579
+  rotateSpeed: 0.5
+  branchOrderMax: 2
+  growthCycles: 8
+  clusterGridNumCells: 15
+  branchParameters:
+  - orderName: Order 1
+    order: 1
+    maxSubBranchesPerNode: 4
+    cyclesBetweenBranching: 1
+    growthLength: 6.5
+    numRingsBetweenNodes: 6
+    thickness: 3
+    branchShrinkness: 0.75
+    dieProbability: 0
+    pauseProbability: 0
+    tropism: 0
+    spiraling: 1
+    spiralAngle: 60
+    spiralStartAngle: 0
+    wiggleFactor: 0.05
+    densityThreshold: 500
+  - orderName: Order 2
+    order: 2
+    maxSubBranchesPerNode: 3
+    cyclesBetweenBranching: 6
+    growthLength: 6
+    numRingsBetweenNodes: 8
+    thickness: 3
+    branchShrinkness: 0.75
+    dieProbability: 0.02
+    pauseProbability: 0.1
+    tropism: 0
+    spiraling: 1
+    spiralAngle: 60
+    spiralStartAngle: 0
+    wiggleFactor: 0.05
+    densityThreshold: 500
+--- !u!4 &1771584206
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1771584204}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 50, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1881845287
 GameObject:
