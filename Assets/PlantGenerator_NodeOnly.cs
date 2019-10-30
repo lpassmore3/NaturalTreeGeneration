@@ -23,10 +23,13 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
     ////////////////////////////// Public Attriutes ////////////////////////////////////
     public GameObject transparentCubePrefab;
 
+  
     public int randomSeed = 55;
     public float rotateSpeed = 0.5f;
     public int branchOrderMax = 3;
     public int growthCycles = 6;
+    public int cyclesPerSeason = 2;
+    public bool smoothBranches = false;
 
     // Cluster Grid variables
     float[,,] clusterGrid;       // [i, j, k] = x, y, z position in cluster grid
@@ -183,9 +186,11 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
         public int age;
         public int order;
         public bool isDead;
+        public bool isPaused;
+        public int pauseCount;
         public PlantGenerator_NodeOnly plantGenerator;
 
-        public Node(Vector3 pos, Vector3 dir, int age, int order, PlantGenerator_NodeOnly plantGenerator) {
+        public Node(Vector3 pos, Vector3 dir, int age, int order, bool isPaused, int pauseCount, PlantGenerator_NodeOnly plantGenerator) {
             this.pos = pos;
             this.subBranches = new List<Node>();
             this.direction = dir;
@@ -194,6 +199,8 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             this.age = age;
             this.order = order;
             this.isDead = false;
+            this.isPaused = isPaused;
+            this.pauseCount = 0;
             this.plantGenerator = plantGenerator;
         }
 
@@ -328,10 +335,12 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             bool spiraling = plantGenerator.branchParameters[branchOrder - 1].spiraling;
             float spiralAngle = plantGenerator.branchParameters[branchOrder - 1].spiralAngle;
             float spiralStartAngle = plantGenerator.branchParameters[branchOrder - 1].spiralStartAngle;
+            float subBranchAngle = plantGenerator.branchParameters[branchOrder - 1].subBranchAngle;
             float tropism = plantGenerator.branchParameters[branchOrder - 1].tropism;
             float wiggleFactor = plantGenerator.branchParameters[branchOrder - 1].wiggleFactor;
             float wiggleCorrected = (growthLength / numRings) * wiggleFactor;
             float densityThreshold = plantGenerator.branchParameters[branchOrder - 1].densityThreshold;
+            float pauseProbability = plantGenerator.branchParameters[branchOrder - 1].pauseProbability;
 
             // Add the rings
             Vector3 newTipPos = oldTipPos;
@@ -369,13 +378,23 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                     //newVerts[oldVertLength + 4] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness));
                     //newVerts[oldVertLength + 5] = newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness));
 
-                    newVerts.Add(newTipPos);
-                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness)));
-                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness)));
-                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness)));
-                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness)));
-                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness)));
-                    newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness)));
+                    if (plantGenerator.smoothBranches) {
+                        newVerts.Add(newTipPos);
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / (branchOrder * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / (branchOrder * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / (branchOrder * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / (branchOrder * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / (branchOrder * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / (branchOrder * branchShrinkness)));
+                    } else {
+                        newVerts.Add(newTipPos);
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 0f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 0f))) / ((branchOrder + age) * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 60f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 60f))) / ((branchOrder + age) * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 120f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 120f))) / ((branchOrder + age) * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 180f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 180f))) / ((branchOrder + age) * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 240f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 240f))) / ((branchOrder + age) * branchShrinkness)));
+                        newVerts.Add(newTipPos + (thickness * ((N * Mathf.Cos(Mathf.Deg2Rad * 300f)) + (B * Mathf.Sin(Mathf.Deg2Rad * 300f))) / ((branchOrder + age) * branchShrinkness)));
+                    }
 
                     newVertsLength = oldVertLength + 7;
 
@@ -701,7 +720,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             }
 
             // Create a new tipNode
-            Node newTipNode = new Node(capPos, newTipDir, age + 1, branchOrder, plantGenerator);
+            Node newTipNode = new Node(capPos, newTipDir, age + 1, branchOrder, false, 0, plantGenerator);
 
             // Add a number of branches at the new node if enough growth cycles have gone by
             if (branchOrder < plantGenerator.branchOrderMax) { // Make sure the the plant is not branching too deep
@@ -717,13 +736,24 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                             float symmetryAngle = i * Mathf.Deg2Rad * 360f / numBranches;
                             float startAngle = Mathf.Deg2Rad * spiralStartAngle;
                             dir = (N * Mathf.Cos(branchSpiralAngle + symmetryAngle + startAngle)) + (B * Mathf.Sin(branchSpiralAngle + symmetryAngle + startAngle));
+
+                            float subBranchThetha = Mathf.Deg2Rad * subBranchAngle;
+                            dir = (dir * Mathf.Cos(subBranchThetha)) + (T * Mathf.Sin(subBranchThetha));
+                            dir = dir.normalized;
                         }
                         else {
                             dir = new Vector3((Random.value * 2f) - 1f, Random.value / 4f, (Random.value * 2f) - 1f);
+                            dir = dir.normalized;
                         }
                         //Vector3 dir = new Vector3(1, 1, 1);
                         Vector3 subBranchPos = newTipPos - T;
-                        Node subBranchNode = new Node(subBranchPos, dir, age + 1, branchOrder + 1, plantGenerator);
+                        Node subBranchNode;
+                        float pauseChance = Random.value;
+                        if (pauseChance <= pauseProbability) {
+                            subBranchNode = new Node(subBranchPos, dir, age + 1, branchOrder + 1, true, 0, plantGenerator);
+                        } else {
+                            subBranchNode = new Node(subBranchPos, dir, age + 1, branchOrder + 1, false, 0, plantGenerator);
+                        }
                         newTipNode.addSubBranch(subBranchNode);
                         if (i == numBranches - 1 && numBranches > 0) {
                             subBranchCount++;
@@ -826,6 +856,66 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             return -1f;
         }
 
+
+        // Tapers the branch to be smooth. Should be done after the plant is finished growing
+        public void taperBranch() {
+            Vector3[] verts = branchMesh.vertices;
+            int vertsInRing = 6;
+            int numRings = verts.Length / (vertsInRing + 1);   // 6 is the number of verts used to make a ring
+
+            for (int i = 0; i < numRings; i++) {
+                Vector3 p1;
+                Vector3 p2;
+                Vector3 p3;
+                Vector3 p4;
+                Vector3 p5;
+                Vector3 p6;
+
+                float t = (float)(numRings - 1 - i) / (float)(numRings - 1);
+                //t = numRings - 1 - i;
+
+                if (i == 0) {
+                    p1 = verts[(i * vertsInRing) + 1];
+                    p2 = verts[(i * vertsInRing) + 2];
+                    p3 = verts[(i * vertsInRing) + 3];
+                    p4 = verts[(i * vertsInRing) + 4];
+                    p5 = verts[(i * vertsInRing) + 5];
+                    p6 = verts[(i * vertsInRing) + 6];
+
+                    Vector3 c = (p1 + p2 + p3 + p4 + p5 + p6) / 6f;
+
+                    verts[(i * vertsInRing) + 1] = ((1 - t) * c) + (t * p1);
+                    verts[(i * vertsInRing) + 2] = ((1 - t) * c) + (t * p2);
+                    verts[(i * vertsInRing) + 3] = ((1 - t) * c) + (t * p3);
+                    verts[(i * vertsInRing) + 4] = ((1 - t) * c) + (t * p4);
+                    verts[(i * vertsInRing) + 5] = ((1 - t) * c) + (t * p5);
+                    verts[(i * vertsInRing) + 6] = ((1 - t) * c) + (t * p6);
+
+                } else {
+                    p1 = verts[i * (vertsInRing + 1) + 1];
+                    p2 = verts[i * (vertsInRing + 1) + 2];
+                    p3 = verts[i * (vertsInRing + 1) + 3];
+                    p4 = verts[i * (vertsInRing + 1) + 4];
+                    p5 = verts[i * (vertsInRing + 1) + 5];
+                    p6 = verts[i * (vertsInRing + 1) + 6];
+
+                    //print((i * (vertsInRing + 1) + 1));
+
+                    Vector3 c = (p1 + p2 + p3 + p4 + p5 + p6) / 6f;
+
+                    verts[i * (vertsInRing + 1) + 1] = ((1 - t) * c) + (t * p1);
+                    verts[i * (vertsInRing + 1) + 2] = ((1 - t) * c) + (t * p2);
+                    verts[i * (vertsInRing + 1) + 3] = ((1 - t) * c) + (t * p3);
+                    verts[i * (vertsInRing + 1) + 4] = ((1 - t) * c) + (t * p4);
+                    verts[i * (vertsInRing + 1) + 5] = ((1 - t) * c) + (t * p5);
+                    verts[i * (vertsInRing + 1) + 6] = ((1 - t) * c) + (t * p6);
+
+                }
+            }
+            //print(verts.Length);
+            branchMesh.vertices = verts;
+        }
+
     }
 
 
@@ -835,7 +925,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
 
     // Begins a new branch by create a tip node and the branch object
     // Also creates the mesh for the base of the first cylinder
-    public void startBranch(Vector3 pos, Vector3 dir, int age, int order) {
+    public void startBranch(Vector3 pos, Vector3 dir, int age, int order, bool isPaused) {
         // If this is the first branch of the plant, make its direction up
         Vector3 direct;
         if (branches.Count == 0) {
@@ -847,7 +937,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
             //direct = new Vector3((Random.value * 2f) - 1f, 0.1f + Random.value, (Random.value * 2f) - 1f);
             direct = dir;
         }
-        Node startNode = new Node(pos, direct, age, order, this);
+        Node startNode = new Node(pos, direct, age, order, isPaused, 0, this);
         Branch newBranch = new Branch(startNode, this);
 
         // Create cylinder base in mesh
@@ -917,7 +1007,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
     public GameObject generatePlant() {
 
         // Create the first branch
-        startBranch(new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f), 1, 1);
+        startBranch(new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f), 1, 1, false);
 
         // Grow branches
         for (int i = 0; i < growthCycles; i++) {
@@ -948,10 +1038,16 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
                 //}
 
                 //////////// TODO: Fix randomness here /////////////////////
-
-                Node newNode = branch.grow();
-                foreach (Node subBranchNode in newNode.getSubBranches()) {
-                    newBranchNodes.Add(subBranchNode);
+                if (tipNode.isPaused == true) {
+                    tipNode.pauseCount++;
+                    if (tipNode.pauseCount == cyclesPerSeason) {
+                        tipNode.isPaused = false;
+                    }
+                } else {
+                    Node newNode = branch.grow();
+                    foreach (Node subBranchNode in newNode.getSubBranches()) {
+                        newBranchNodes.Add(subBranchNode);
+                    }
                 }
             }
 
@@ -959,7 +1055,7 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
 
             // Start new branches at new nodes' side buds
             foreach (Node subBranchStart in newBranchNodes) {
-                startBranch(subBranchStart.getPos(), subBranchStart.getDir(), subBranchStart.getAge(), subBranchStart.getOrder());
+                startBranch(subBranchStart.getPos(), subBranchStart.getDir(), subBranchStart.getAge(), subBranchStart.getOrder(), subBranchStart.isPaused);
             }
         }
 
@@ -968,6 +1064,9 @@ public class PlantGenerator_NodeOnly : MonoBehaviour
 
         // Create the branch objects
         foreach (Branch branch in branches) {
+            if (smoothBranches) {
+                branch.taperBranch();
+            }
             GameObject branchObj = new GameObject();
             branchObj.name = "Branch";
             branchObj.AddComponent<MeshFilter>();
@@ -1044,6 +1143,7 @@ public class BranchParam
     public bool spiraling = true;
     public float spiralAngle = 60f;
     public float spiralStartAngle = 0f;
+    public float subBranchAngle = 0f;
     public float wiggleFactor = 0.05f;
     public float densityThreshold = 500f;
 
@@ -1052,7 +1152,7 @@ public class BranchParam
         orderName = "Order " + ord.ToString();
     }
 
-    public BranchParam(string name, int ord, int maxBranch, int betweenBranch, float growL, int nRings, float thick, float shrink, float die, float pause, float trop, bool spiral, float sAngle, float sStartAngle, float wiggle, float denseThresh) {
+    public BranchParam(string name, int ord, int maxBranch, int betweenBranch, float growL, int nRings, float thick, float shrink, float die, float pause, float trop, bool spiral, float sAngle, float sStartAngle, float sBranchAngle, float wiggle, float denseThresh) {
         orderName = name;
         order = ord;
         maxSubBranchesPerNode = maxBranch;
@@ -1067,6 +1167,7 @@ public class BranchParam
         spiraling = spiral;
         spiralAngle = sAngle;
         spiralStartAngle = sStartAngle;
+        subBranchAngle = sBranchAngle;
         wiggleFactor = wiggle;
         densityThreshold = denseThresh;
 

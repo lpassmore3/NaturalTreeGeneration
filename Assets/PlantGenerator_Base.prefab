@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4160973965869475574
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4160973965869475572}
+  - component: {fileID: 4160973965869475575}
+  m_Layer: 0
+  m_Name: PlantGenerator_Base
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4160973965869475572
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4160973965869475574}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4160973965869475575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4160973965869475574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44c92d9bc6539904fa6f45dd40fd04de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  transparentCubePrefab: {fileID: 2628962019459238065, guid: 8505030d48079704e96de9905aaa871c,
+    type: 3}
+  randomSeed: 23579
+  rotateSpeed: 0.5
+  branchOrderMax: 2
+  growthCycles: 8
+  clusterGridNumCells: 15
+  branchParameters:
+  - orderName: Order 1
+    order: 1
+    maxSubBranchesPerNode: 4
+    cyclesBetweenBranching: 1
+    growthLength: 6.5
+    numRingsBetweenNodes: 6
+    thickness: 3
+    branchShrinkness: 0.75
+    dieProbability: 0
+    pauseProbability: 0
+    tropism: 0
+    spiraling: 1
+    spiralAngle: 60
+    spiralStartAngle: 0
+    subBranchAngle: 0
+    wiggleFactor: 0.05
+    densityThreshold: 500
+  - orderName: Order 2
+    order: 2
+    maxSubBranchesPerNode: 3
+    cyclesBetweenBranching: 6
+    growthLength: 6
+    numRingsBetweenNodes: 8
+    thickness: 3
+    branchShrinkness: 0.75
+    dieProbability: 0.02
+    pauseProbability: 0.1
+    tropism: 0
+    spiraling: 1
+    spiralAngle: 60
+    spiralStartAngle: 0
+    subBranchAngle: 0
+    wiggleFactor: 0.05
+    densityThreshold: 500

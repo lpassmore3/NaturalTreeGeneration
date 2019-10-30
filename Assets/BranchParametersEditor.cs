@@ -29,6 +29,8 @@ public class BranchParametersEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("rotateSpeed"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("branchOrderMax"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("growthCycles"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("cyclesPerSeason"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("smoothBranches"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("clusterGridNumCells"));
         EditorGUILayout.IntField("Order Depth", BranchParameterList.arraySize);
         EditorGUILayout.PropertyField(BranchParameterList);
@@ -50,6 +52,7 @@ public class BranchParametersEditor : Editor
             SerializedProperty spiraling = branchParamObject.FindPropertyRelative("spiraling");
             SerializedProperty spiralAngle = branchParamObject.FindPropertyRelative("spiralAngle");
             SerializedProperty spiralStartAngle = branchParamObject.FindPropertyRelative("spiralStartAngle");
+            SerializedProperty subBranchAngle = branchParamObject.FindPropertyRelative("subBranchAngle");
             SerializedProperty wiggleFactor = branchParamObject.FindPropertyRelative("wiggleFactor");
             SerializedProperty densityThreshold = branchParamObject.FindPropertyRelative("densityThreshold");
 
@@ -68,10 +71,12 @@ public class BranchParametersEditor : Editor
             t.branchParameters[i].spiraling = EditorGUILayout.Toggle("Spiraling", spiraling.boolValue);
             t.branchParameters[i].spiralAngle = EditorGUILayout.FloatField("Spiral Angle", spiralAngle.floatValue);
             t.branchParameters[i].spiralStartAngle = EditorGUILayout.FloatField("Spiral Start Angle", spiralStartAngle.floatValue);
+            t.branchParameters[i].subBranchAngle = EditorGUILayout.FloatField("Sub Branch Angle", subBranchAngle.floatValue);
             t.branchParameters[i].wiggleFactor = EditorGUILayout.FloatField("Wiggle Factor", wiggleFactor.floatValue);
             t.branchParameters[i].densityThreshold = EditorGUILayout.FloatField("Density Threshold", densityThreshold.floatValue);
 
             EditorGUI.indentLevel -= 1;
+            serializedObject.ApplyModifiedProperties();
         }
 
         if (GUILayout.Button(addOrderButton)) {
